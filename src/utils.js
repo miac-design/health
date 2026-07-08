@@ -65,10 +65,6 @@ export function downloadJSON(obj, filename) {
   URL.revokeObjectURL(url)
 }
 
-export const CATEGORY_EMOJI = {
-  Face: '🧴', Body: '🛁', Hair: '💇‍♀️', Makeup: '💄', Supplement: '💊', Other: '📦',
-}
-
 export function money(v) {
   if (v === '' || v == null || isNaN(Number(v))) return ''
   return Number(v).toLocaleString('en-US', { style: 'currency', currency: 'USD' })

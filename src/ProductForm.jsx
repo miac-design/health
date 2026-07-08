@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { db, CATEGORIES } from './db'
 import { Modal, Field, Seg, PhotoInput, Stars, Toggle } from './ui'
+import { Icon } from './icons'
 
 const BLANK = {
   name: '', category: 'Face', timeOfDay: 'Morning', frequency: 'Daily',
@@ -71,7 +72,7 @@ export default function ProductForm({ initial, onClose, onSaved, forceCategory }
 
         {isSupp && (
           <div className="card tinted" style={{ padding: 16, marginBottom: 16 }}>
-            <div style={{ fontWeight: 650, marginBottom: 12 }}>💊 Supplement details</div>
+            <div className="row-flex" style={{ gap: 7, fontWeight: 650, marginBottom: 12 }}><Icon name="pill" size={16} /> Supplement details</div>
             <div className="form-row">
               <Field label="Dose">
                 <input className="input" value={p.dose} onChange={e => set('dose', e.target.value)} placeholder="e.g. 400 mg" />
@@ -119,7 +120,7 @@ export default function ProductForm({ initial, onClose, onSaved, forceCategory }
           <Field label="Would repurchase?">
             <div className="row-flex">
               <Toggle on={p.repurchase} onChange={v => set('repurchase', v)} label="Repurchase" />
-              <span className="muted" style={{ fontSize: 14 }}>{p.repurchase ? 'Yes 💚' : 'No'}</span>
+              <span className="muted" style={{ fontSize: 14 }}>{p.repurchase ? 'Yes' : 'No'}</span>
             </div>
           </Field>
         </div>

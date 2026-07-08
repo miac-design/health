@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react'
-import { readImageFile, CATEGORY_EMOJI } from './utils'
+import React, { useRef } from 'react'
+import { readImageFile } from './utils'
+import { Icon, ICON_CHOICES, CATEGORY_ICON } from './icons'
 
 export function Modal({ title, onClose, children }) {
   return (
@@ -7,7 +8,7 @@ export function Modal({ title, onClose, children }) {
       <div className="sheet" role="dialog" aria-label={title}>
         <div className="sheet-head">
           <h2>{title}</h2>
-          <button className="sheet-close" onClick={onClose} aria-label="Close">✕</button>
+          <button className="sheet-close" onClick={onClose} aria-label="Close"><Icon name="x" size={16} /></button>
         </div>
         {children}
       </div>
@@ -58,31 +59,7 @@ export function Stars({ value = 0, onChange, readonly }) {
           className={n <= value ? 'on' : ''}
           onClick={readonly ? undefined : () => onChange(n === value ? 0 : n)}
           aria-label={`${n} star${n > 1 ? 's' : ''}`}
-        >⭐</button>
-      ))}
-    </div>
-  )
-}
-
-export function Stepper({ value, onChange, min = 0, max = 99, step = 1, suffix = '' }) {
-  return (
-    <div className="stepper">
-      <button type="button" onClick={() => onChange(Math.max(min, +(value - step).toFixed(1)))}>−</button>
-      <span className="val">{value}{suffix}</span>
-      <button type="button" onClick={() => onChange(Math.min(max, +(value + step).toFixed(1)))}>+</button>
-    </div>
-  )
-}
-
-const SCALE_FACES = ['😞', '😕', '😐', '🙂', '😄']
-export function Scale({ value, onChange, faces = SCALE_FACES }) {
-  return (
-    <div className="scale">
-      {faces.map((f, i) => (
-        <button key={i} type="button" className={value === i + 1 ? 'active' : ''}
-          onClick={() => onChange(value === i + 1 ? null : i + 1)} aria-label={`${i + 1} of 5`}>
-          {f}
-        </button>
+        ><Icon name="star" /></button>
       ))}
     </div>
   )
@@ -94,11 +71,24 @@ export function Toggle({ on, onChange, label }) {
   )
 }
 
+export function IconPicker({ value, onChange }) {
+  return (
+    <div className="icon-picker">
+      {ICON_CHOICES.map(n => (
+        <button key={n} type="button" className={value === n ? 'active' : ''}
+          onClick={() => onChange(n)} aria-label={n}>
+          <Icon name={n} size={19} />
+        </button>
+      ))}
+    </div>
+  )
+}
+
 export function PhotoInput({ value, onChange, label = 'Add photo' }) {
   const ref = useRef()
   return (
     <div className="photo-input" onClick={() => ref.current.click()} role="button" tabIndex={0}>
-      {value ? <img src={value} alt="" /> : <><span style={{ fontSize: 26 }}>📷</span>{label}</>}
+      {value ? <img src={value} alt="" /> : <><Icon name="camera" size={26} />{label}</>}
       <input
         ref={ref} type="file" accept="image/*" hidden
         onChange={async e => {
@@ -111,75 +101,23 @@ export function PhotoInput({ value, onChange, label = 'Add photo' }) {
   )
 }
 
-export function ProductThumb({ product, size = 62, radius = 16, emoji }) {
+export function ProductThumb({ product, size = 62, radius = 16, icon }) {
   const style = { width: size, height: size, borderRadius: radius, objectFit: 'cover', flexShrink: 0 }
   if (product?.photo) return <img src={product.photo} alt={product.name} style={style} />
   return (
-    <div style={{ ...style, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * 0.42, background: 'linear-gradient(135deg, var(--sage-50), var(--sand))' }}>
-      {emoji || CATEGORY_EMOJI[product?.category] || '🧴'}
+    <div className="icn-box t-sage" style={{ ...style, background: 'linear-gradient(135deg, var(--sage-50), var(--sand))' }}>
+      <Icon name={icon || CATEGORY_ICON[product?.category] || 'droplets'} size={Math.round(size * 0.42)} />
     </div>
   )
 }
 
-export function Empty({ emoji, title, children, action }) {
+export function Empty({ icon, title, children, action }) {
   return (
     <div className="empty">
-      <div className="e-emoji">{emoji}</div>
+      <div className="e-icon"><Icon name={icon} size={36} /></div>
       <div className="e-title">{title}</div>
       <p>{children}</p>
       {action}
-    </div>
-  )
-}
-
-/* ---------- charts (single-series, sage; hover tooltip per point) ---------- */
-
-export function Sparkline({ points, labels, color = 'var(--chart-1)', height = 64, unit = '', goal }) {
-  const [tip, setTip] = useState(null)
-  const w = 100, h = 40, pad = 3
-  const vals = points.map(p => (p == null ? null : Number(p)))
-  const present = vals.filter(v => v != null)
-  if (present.length === 0) {
-    return <div className="tiny" style={{ padding: '18px 0' }}>No data yet — log a few days to see the trend.</div>
-  }
-  const min = Math.min(...present, goal ?? Infinity)
-  const max = Math.max(...present, goal ?? -Infinity)
-  const span = max - min || 1
-  const x = i => pad + (i / Math.max(1, vals.length - 1)) * (w - pad * 2)
-  const y = v => h - pad - ((v - min) / span) * (h - pad * 2)
-  const segs = []
-  let cur = []
-  vals.forEach((v, i) => {
-    if (v == null) { if (cur.length) segs.push(cur); cur = [] }
-    else cur.push([x(i), y(v), i])
-  })
-  if (cur.length) segs.push(cur)
-
-  return (
-    <div style={{ position: 'relative' }}>
-      <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height, display: 'block' }} preserveAspectRatio="none">
-        {goal != null && (
-          <line x1={pad} x2={w - pad} y1={y(goal)} y2={y(goal)} stroke="var(--ink-3)" strokeWidth="0.5" strokeDasharray="2 2" />
-        )}
-        {segs.map((seg, si) => (
-          <polyline key={si} fill="none" stroke={color} strokeWidth="1.6"
-            strokeLinecap="round" strokeLinejoin="round"
-            points={seg.map(([px, py]) => `${px},${py}`).join(' ')} />
-        ))}
-        {segs.flat().map(([px, py, i]) => (
-          <circle key={i} cx={px} cy={py} r={tip?.i === i ? 2.6 : 1.4} fill={color}
-            stroke="var(--surface)" strokeWidth="0.8" style={{ cursor: 'pointer' }}
-            onMouseEnter={() => setTip({ i, px, py })}
-            onMouseLeave={() => setTip(null)}
-            onClick={() => setTip(tip?.i === i ? null : { i, px, py })}
-          />
-        ))}
-      </svg>
-      {tip && (
-        <div className="chart-tip" style={{ left: `${tip.px}%`, top: `${(tip.py / h) * 100}%` }}>
-          {labels?.[tip.i] ? `${labels[tip.i]} · ` : ''}{vals[tip.i]}{unit}
-        </div>
-      )}
     </div>
   )
 }

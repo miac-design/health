@@ -2,11 +2,12 @@ import React, { useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, NOTE_CATEGORIES } from '../db'
 import { Modal, Field, Chips, Empty } from '../ui'
+import { Icon } from '../icons'
 import { todayStr, fmtDate } from '../utils'
 
-const CAT_EMOJI = {
-  'Routine changes': '🔄', 'Product reviews': '⭐', 'Questions': '❓',
-  'Doctor recommendations': '🩺', 'Lab results': '🧪', 'Health notes': '❤️',
+const CAT_ICON = {
+  'Routine changes': 'refresh-cw', 'Product reviews': 'star', 'Questions': 'circle-help',
+  'Doctor recommendations': 'stethoscope', 'Lab results': 'flask-conical', 'Health notes': 'heart',
 }
 
 function NoteForm({ initial, onClose }) {
@@ -70,19 +71,19 @@ export default function Notes() {
 
   return (
     <>
-      <h1 className="page-title">📝 Notes & Records</h1>
+      <h1 className="page-title">Notes & Records</h1>
       <p className="page-sub">Routine changes, reviews, questions for the doctor, lab results</p>
 
       <div className="stack" style={{ marginBottom: 18 }}>
         <div className="search-bar">
-          <span>🔍</span>
+          <Icon name="search" size={17} style={{ color: 'var(--ink-3)' }} />
           <input placeholder="Search notes…" value={q} onChange={e => setQ(e.target.value)} />
         </div>
         <Chips options={NOTE_CATEGORIES} value={cat} onChange={setCat} allLabel="All" />
       </div>
 
       {filtered.length === 0 ? (
-        <Empty emoji="📝" title={notes.length === 0 ? 'No notes yet' : 'Nothing matches'}
+        <Empty icon="notebook-pen" title={notes.length === 0 ? 'No notes yet' : 'Nothing matches'}
           action={<button className="btn" onClick={() => setForm({})}>+ Write a note</button>}>
           {notes.length === 0
             ? 'Keep everything here — what your doctor said, how a product felt, lab numbers to remember.'
@@ -93,7 +94,7 @@ export default function Notes() {
           {filtered.map(n => (
             <div key={n.id} className="note-card" onClick={() => setForm(n)}>
               <div className="spread">
-                <span className="badge neutral">{CAT_EMOJI[n.category]} {n.category}</span>
+                <span className="badge neutral"><Icon name={CAT_ICON[n.category]} size={11} /> {n.category}</span>
                 <span className="tiny">{fmtDate(n.date, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
               </div>
               {n.title && <h4>{n.title}</h4>}
@@ -103,7 +104,7 @@ export default function Notes() {
         </div>
       )}
 
-      <button className="fab" onClick={() => setForm({})} aria-label="New note">+</button>
+      <button className="fab" onClick={() => setForm({})} aria-label="New note"><Icon name="plus" size={26} /></button>
       {form && <NoteForm initial={form.id ? form : undefined} onClose={() => setForm(null)} />}
     </>
   )

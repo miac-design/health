@@ -3,8 +3,9 @@ import { useSearchParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, CATEGORIES } from '../db'
 import { Chips, Empty, Modal, Stars, ProductThumb } from '../ui'
+import { Icon, CATEGORY_ICON } from '../icons'
 import ProductForm from '../ProductForm'
-import { CATEGORY_EMOJI, money, fmtDate, daysUntil } from '../utils'
+import { money, fmtDate, daysUntil } from '../utils'
 
 export function ProductCard({ p, onClick }) {
   const exp = daysUntil(p.expirationDate)
@@ -12,14 +13,14 @@ export function ProductCard({ p, onClick }) {
     <div className="product-card" onClick={onClick}>
       {p.photo
         ? <img className="product-photo" src={p.photo} alt={p.name} />
-        : <div className="product-photo placeholder">{CATEGORY_EMOJI[p.category] || '🧴'}</div>}
+        : <div className="product-photo placeholder"><Icon name={CATEGORY_ICON[p.category] || 'droplets'} size={44} /></div>}
       <div className="p-body">
         <div className="p-name">{p.name}</div>
         <div className="p-tags">
           <span className="badge neutral">{p.category}</span>
-          {p.timeOfDay === 'Night' ? <span className="badge night">🌙 Night</span>
-            : p.timeOfDay === 'Both' ? <span className="badge">🌞🌙</span>
-              : <span className="badge">🌞 AM</span>}
+          {p.timeOfDay === 'Night' ? <span className="badge night"><Icon name="moon" size={11} /> Night</span>
+            : p.timeOfDay === 'Both' ? <span className="badge"><Icon name="sun" size={11} /><Icon name="moon" size={11} /></span>
+              : <span className="badge"><Icon name="sun" size={11} /> AM</span>}
           {exp != null && exp <= 30 && (
             <span className={`badge ${exp <= 0 ? 'danger' : 'warn'}`}>{exp <= 0 ? 'Expired' : `${exp}d left`}</span>
           )}
@@ -50,7 +51,7 @@ export function ProductDetail({ p, onClose, onEdit }) {
     ['Expires', p.expirationDate && fmtDate(p.expirationDate, { year: 'numeric', month: 'short', day: 'numeric' })],
     ['Price', money(p.price)],
     ['Bought at', p.store],
-    ['Repurchase?', p.repurchase ? 'Yes 💚' : 'No'],
+    ['Repurchase?', p.repurchase ? 'Yes' : 'No'],
   ].filter(([, v]) => v)
 
   const remove = async () => {
@@ -114,12 +115,12 @@ export default function Products() {
 
   return (
     <>
-      <h1 className="page-title">📦 Product Library</h1>
+      <h1 className="page-title">Product Library</h1>
       <p className="page-sub">{products.length} product{products.length === 1 ? '' : 's'} · every bottle, jar and capsule you own</p>
 
       <div className="stack" style={{ marginBottom: 18 }}>
         <div className="search-bar">
-          <span>🔍</span>
+          <Icon name="search" size={17} style={{ color: 'var(--ink-3)' }} />
           <input placeholder="Search products, purposes, notes…" value={q} onChange={e => setQ(e.target.value)} />
         </div>
         <Chips options={CATEGORIES} value={cat} allLabel="All"
@@ -127,7 +128,7 @@ export default function Products() {
       </div>
 
       {filtered.length === 0 ? (
-        <Empty emoji="🧴" title={products.length === 0 ? 'Your library is empty' : 'Nothing matches'}
+        <Empty icon="droplets" title={products.length === 0 ? 'Your library is empty' : 'Nothing matches'}
           action={<button className="btn" onClick={() => setAdding(true)}>+ Add your first product</button>}>
           {products.length === 0
             ? 'Add each product with its photo — it becomes searchable and can be linked into your routines.'
@@ -139,7 +140,7 @@ export default function Products() {
         </div>
       )}
 
-      <button className="fab" onClick={() => setAdding(true)} aria-label="Add product">+</button>
+      <button className="fab" onClick={() => setAdding(true)} aria-label="Add product"><Icon name="plus" size={26} /></button>
 
       {adding && <ProductForm forceCategory={cat || undefined} onClose={() => setAdding(false)} />}
       {live && !editing && (

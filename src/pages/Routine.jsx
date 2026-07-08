@@ -3,19 +3,21 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import { todayStr } from '../utils'
-import { Modal, Field, ProductThumb, Ring } from '../ui'
+import { Modal, Field, ProductThumb, Ring, IconPicker } from '../ui'
+import { Icon, IconBox } from '../icons'
 
 const META = {
-  morning: { title: '🌞 Morning Routine', sub: 'Start the day slow and glowing', accent: 'var(--chart-1)' },
-  evening: { title: '🌙 Evening Routine', sub: 'Wind down, repair, restore', accent: 'var(--chart-4)' },
-  shower: { title: '🛁 Shower Routine', sub: 'Hair · Body · Feet · Hands · Nails', accent: 'var(--chart-2)' },
+  morning: { title: 'Morning Routine', icon: 'sunrise', tint: 'sand', sub: 'Start the day slow and glowing', accent: 'var(--chart-1)' },
+  evening: { title: 'Evening Routine', icon: 'moon', tint: 'lav', sub: 'Wind down, repair, restore', accent: 'var(--chart-4)' },
+  shower: { title: 'Shower Routine', icon: 'shower-head', tint: 'water', sub: 'Hair · Body · Feet · Hands · Nails', accent: 'var(--chart-2)' },
 }
 const SHOWER_SECTIONS = ['Hair', 'Body', 'Feet', 'Hands', 'Nails']
+const SECTION_ICON = { Hair: 'brush', Body: 'bath', Feet: 'footprints', Hands: 'hand', Nails: 'droplet' }
 
 function StepForm({ which, initial, maxOrder, onClose }) {
   const products = useLiveQuery(() => db.products.toArray(), []) || []
   const [s, setS] = useState({
-    routine: which, title: '', emoji: '✨', productId: '', instructions: '',
+    routine: which, title: '', icon: 'sparkles', productId: '', instructions: '',
     quantity: '', waitTime: '', area: which === 'shower' ? 'Body' : 'Face', why: '',
     section: which === 'shower' ? 'Hair' : undefined,
     order: maxOrder + 1,
@@ -33,16 +35,14 @@ function StepForm({ which, initial, maxOrder, onClose }) {
   }
 
   return (
-    <Modal title={s.id ? 'Edit step' : 'Add step'} onClose={onClose}>
+    <Modal title={s.id ? 'Edit step' : 'New step'} onClose={onClose}>
       <form onSubmit={save}>
-        <div className="form-row">
-          <Field label="Step name">
-            <input className="input" value={s.title} onChange={e => set('title', e.target.value)} placeholder="e.g. Vitamin C serum" required autoFocus />
-          </Field>
-          <Field label="Emoji">
-            <input className="input" value={s.emoji} onChange={e => set('emoji', e.target.value)} maxLength={4} />
-          </Field>
-        </div>
+        <Field label="Step name">
+          <input className="input" value={s.title} onChange={e => set('title', e.target.value)} placeholder="e.g. Vitamin C serum" required autoFocus />
+        </Field>
+        <Field label="Icon">
+          <IconPicker value={s.icon} onChange={v => set('icon', v)} />
+        </Field>
         <Field label="Link a product from your library (shows its photo)">
           <select className="input" value={s.productId} onChange={e => set('productId', e.target.value)}>
             <option value="">— No product linked —</option>
@@ -90,35 +90,35 @@ function StepForm({ which, initial, maxOrder, onClose }) {
   )
 }
 
-function Step({ step, idx, product, done, onToggle, editMode, onEdit, onMove, isFirst, isLast }) {
+function Step({ step, idx, product, done, onToggle, editMode, onEdit, onMove, isFirst, isLast, tint }) {
   return (
     <div className={`flow-step ${done ? 'done' : ''}`}>
       <div className="rail">
         <button className="dot" onClick={onToggle} aria-label={done ? 'Mark not done' : 'Mark done'}>
-          {done ? '✓' : idx + 1}
+          {done ? <Icon name="check" size={14} /> : idx + 1}
         </button>
         <div className="line" />
       </div>
       <div className="step-card">
         {product
           ? <ProductThumb product={product} size={62} />
-          : <div className="step-photo">{step.emoji || '✨'}</div>}
+          : <IconBox name={step.icon || step.emoji} tint={tint} size={62} iconSize={26} />}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="spread">
             <div className="s-name">{product ? product.name : step.title}</div>
             {editMode && (
               <div className="row-flex" style={{ gap: 4 }}>
-                <button className="btn ghost icon-only small" disabled={isFirst} onClick={() => onMove(-1)} aria-label="Move up">↑</button>
-                <button className="btn ghost icon-only small" disabled={isLast} onClick={() => onMove(1)} aria-label="Move down">↓</button>
-                <button className="btn ghost icon-only small" onClick={onEdit} aria-label="Edit">✎</button>
+                <button className="btn ghost icon-only small" disabled={isFirst} onClick={() => onMove(-1)} aria-label="Move up"><Icon name="chevron-up" size={15} /></button>
+                <button className="btn ghost icon-only small" disabled={isLast} onClick={() => onMove(1)} aria-label="Move down"><Icon name="chevron-down" size={15} /></button>
+                <button className="btn ghost icon-only small" onClick={onEdit} aria-label="Edit"><Icon name="pencil" size={14} /></button>
               </div>
             )}
           </div>
           {product && <div className="tiny">{step.title}</div>}
           {step.instructions && <div className="s-instr">{step.instructions}</div>}
           <div className="s-meta">
-            {(step.quantity || product?.amount) && <span className="badge neutral">💧 {step.quantity || product.amount}</span>}
-            {step.waitTime && <span className="badge warn">⏱ {step.waitTime}</span>}
+            {(step.quantity || product?.amount) && <span className="badge neutral"><Icon name="droplet" size={11} /> {step.quantity || product.amount}</span>}
+            {step.waitTime && <span className="badge warn"><Icon name="timer" size={11} /> {step.waitTime}</span>}
             {step.area && <span className="badge">{step.area}</span>}
           </div>
           {step.why && <div className="tiny" style={{ marginTop: 7 }}>Why: {step.why}</div>}
@@ -174,45 +174,53 @@ export default function Routine() {
   return (
     <>
       <div className="spread" style={{ flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <h1 className="page-title">{meta.title}</h1>
-          <p className="page-sub">{meta.sub}</p>
+        <div className="row-flex" style={{ gap: 14 }}>
+          <IconBox name={meta.icon} tint={meta.tint} size={52} />
+          <div>
+            <h1 className="page-title">{meta.title}</h1>
+            <p className="page-sub" style={{ marginBottom: 0 }}>{meta.sub}</p>
+          </div>
         </div>
         <Ring value={doneCount} max={steps.length || 1} size={82} stroke={9} color={meta.accent}>
           <div style={{ fontWeight: 700, fontSize: 17 }}>{doneCount}/{steps.length}</div>
         </Ring>
       </div>
 
-      <div className="row-flex" style={{ marginBottom: 22, flexWrap: 'wrap' }}>
+      <div className="row-flex" style={{ margin: '20px 0 22px', flexWrap: 'wrap' }}>
         <div className="seg">
           {Object.entries(META).map(([k, m]) => (
             <button key={k} type="button" className={k === which ? 'active' : ''}
               onClick={() => nav(`/routine/${k}`)}>
-              {m.title.split(' ')[0]} {k[0].toUpperCase() + k.slice(1)}
+              {k[0].toUpperCase() + k.slice(1)}
             </button>
           ))}
         </div>
         <span style={{ flex: 1 }} />
         <button className={`btn small ${editMode ? '' : 'ghost'}`} onClick={() => setEditMode(!editMode)}>
-          {editMode ? 'Done editing' : '✎ Edit routine'}
+          <Icon name="pencil" size={13} /> {editMode ? 'Done editing' : 'Edit routine'}
         </button>
         {doneCount > 0 && <button className="btn small ghost" onClick={resetDay}>Reset today</button>}
       </div>
 
       {doneCount === steps.length && steps.length > 0 && (
-        <div className="banner" style={{ marginBottom: 18 }}>✨ Routine complete — glowing already. See you tomorrow!</div>
+        <div className="banner" style={{ marginBottom: 18 }}>
+          <Icon name="sparkles" size={18} style={{ flexShrink: 0 }} />
+          <span>Routine complete — glowing already. See you tomorrow!</span>
+        </div>
       )}
 
       {sections.map(sec => (
         <div key={sec.name || 'all'}>
-          {sec.name && <h2 className="section-title">{{ Hair: '💇‍♀️', Body: '🧴', Feet: '🦶', Hands: '🤲', Nails: '💅' }[sec.name]} {sec.name}</h2>}
+          {sec.name && (
+            <h2 className="section-title"><Icon name={SECTION_ICON[sec.name]} size={17} /> {sec.name}</h2>
+          )}
           <div className="flow">
             {sec.steps.map(step => {
               counter += 1
               const globalIdx = steps.findIndex(s => s.id === step.id)
               return (
                 <Step
-                  key={step.id} step={step} idx={counter}
+                  key={step.id} step={step} idx={counter} tint={meta.tint}
                   product={step.productId ? products.find(p => p.id === step.productId) : null}
                   done={isDone(step)} onToggle={() => toggle(step)}
                   editMode={editMode} onEdit={() => setForm(step)}
@@ -226,11 +234,11 @@ export default function Routine() {
       ))}
 
       {editMode && (
-        <button className="btn secondary" style={{ marginTop: 8 }} onClick={() => setForm({})}>+ Add a step</button>
+        <button className="btn secondary" style={{ marginTop: 8 }} onClick={() => setForm({})}><Icon name="plus" size={15} /> Add a step</button>
       )}
       {!editMode && steps.length === 0 && (
         <div className="empty">
-          <div className="e-emoji">🫧</div>
+          <div className="e-icon"><Icon name="sparkles" size={36} /></div>
           <div className="e-title">No steps yet</div>
           <p>Tap “Edit routine” to build this routine step by step.</p>
         </div>

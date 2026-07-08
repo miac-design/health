@@ -7,18 +7,16 @@ habits and health — designed to be enjoyable to open every day.
 
 | Dashboard | What it does |
 |---|---|
-| 🏠 **Home** | Beautiful card grid for every area, water ring, today's habit & routine progress |
-| 📦 **Product Library** | Every product with its photo — searchable, filterable by Face / Body / Hair / Makeup / Supplement, with purpose, amount, order, rating, repurchase, dates, price, store, notes, expiry warnings |
-| 🌞 **Morning Routine** | Visual step-by-step checklist with product photos, quantities, wait times, and *why* each step matters |
-| 🌙 **Evening Routine** | Same flow — cleansing, treatments, moisturizer, supplements, in the correct order |
-| 🛁 **Shower Routine** | Sectioned into Hair · Body · Feet · Hands · Nails |
-| 💊 **Supplements** | Dose, best time, with/without food, benefits, interactions, when *not* to take it |
-| ❤️ **Health** | Daily check-in: water, sleep, exercise, mood, stress, energy, weight, period, symptoms — with 2-week trend charts |
-| 📅 **Habits** | Recurring habits with streaks and a 7-day dot history, plus optional **Todoist** sync |
-| 🛍️ **Wishlist** | Save temptations and compare them with products you already own before buying |
-| 📊 **Before & After** | Progress photos for Skin / Hair / Body with side-by-side compare |
-| 📝 **Notes** | Routine changes, product reviews, questions, doctor recommendations, lab results |
-| ⚙️ **Settings** | One-tap JSON backup/restore (photos included) and Todoist token |
+| **Home** | Card grid for every area with live counts, today's habit ring and routine progress |
+| **Product Library** | Every product with its photo — searchable, filterable by Face / Body / Hair / Makeup / Supplement, with purpose, amount, order, rating, repurchase, dates, price, store, notes, expiry warnings |
+| **Morning Routine** | Visual step-by-step checklist with product photos, quantities, wait times, and *why* each step matters |
+| **Evening Routine** | Same flow — cleansing, treatments, moisturizer, supplements, in the correct order |
+| **Shower Routine** | Sectioned into Hair · Body · Feet · Hands · Nails |
+| **Supplements** | Dose, best time, with/without food, benefits, interactions, when *not* to take it |
+| **Habits** | Recurring habits with streaks and a 7-day dot history, plus two-way **Todoist** sync |
+| **Before & After** | Progress photos for Skin / Hair / Body with side-by-side compare |
+| **Notes** | Routine changes, product reviews, questions, doctor recommendations, lab results |
+| **Settings** | One-tap JSON backup/restore (photos included) and Todoist token |
 
 ## Running it
 
@@ -43,13 +41,14 @@ Tap **+** anywhere in the Product Library, snap or upload a photo, pick the cate
 it immediately appears in the library, in the matching Home card counts, and becomes
 linkable as a step in any routine (the routine step then shows the real product photo).
 
-## Todoist integration (optional)
+## Todoist integration
 
-Settings → paste your Todoist API token (Todoist → Settings → Integrations → Developer).
-The Habits page then shows today's Todoist tasks, lets you complete them, and can push
-all your habits into Todoist as daily recurring tasks.
+Habits mirror the **Wellness Habits** project in Todoist. Paste your Todoist API token
+(Todoist → Settings → Integrations → Developer) in Settings and the sync goes both ways:
+checking a habit in the dashboard completes the task in Todoist, and completing a task
+from the Todoist card on the Habits page checks the habit here. "Send habits" creates
+recurring daily tasks for any habit that doesn't have one yet (never duplicates).
 
 ## Tech
 
-Vite + React + Dexie (IndexedDB). No backend, no accounts, no tracking.
-Chart colors are validated for color-vision accessibility and contrast.
+Vite + React + Dexie (IndexedDB) + Lucide icons. No backend, no accounts, no tracking.

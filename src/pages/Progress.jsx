@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, PROGRESS_AREAS } from '../db'
 import { Modal, Field, Seg, Empty } from '../ui'
+import { Icon } from '../icons'
 import { todayStr, fmtDate, readImageFile } from '../utils'
 
 function UploadForm({ area, onClose }) {
@@ -17,7 +18,7 @@ function UploadForm({ area, onClose }) {
       <form onSubmit={save}>
         <Field label="Photo">
           <label className="photo-input" style={{ width: '100%', height: 200 }}>
-            {rec.photo ? <img src={rec.photo} alt="" /> : <><span style={{ fontSize: 30 }}>📷</span>Tap to choose a photo</>}
+            {rec.photo ? <img src={rec.photo} alt="" /> : <><Icon name="camera" size={30} />Tap to choose a photo</>}
             <input type="file" accept="image/*" hidden onChange={async e => {
               const f = e.target.files[0]
               if (f) setRec({ ...rec, photo: await readImageFile(f, 1200) })
@@ -60,7 +61,7 @@ export default function Progress() {
 
   return (
     <>
-      <h1 className="page-title">📊 Before & After</h1>
+      <h1 className="page-title">Before & After</h1>
       <p className="page-sub">Progress is slow until you look back</p>
 
       <div className="spread" style={{ marginBottom: 18, flexWrap: 'wrap', gap: 10 }}>
@@ -68,7 +69,7 @@ export default function Progress() {
         {sorted.length >= 2 && (
           <button className={`btn small ${compareMode ? '' : 'ghost'}`}
             onClick={() => { setCompareMode(!compareMode); setPicked([]) }}>
-            {compareMode ? 'Exit compare' : '⚖️ Compare two'}
+            {compareMode ? 'Exit compare' : <><Icon name="git-compare-arrows" size={13} /> Compare two</>}
           </button>
         )}
       </div>
@@ -86,11 +87,11 @@ export default function Progress() {
         </div>
       )}
       {compareMode && pickedPhotos.length < 2 && (
-        <div className="banner" style={{ marginBottom: 18 }}>👆 Tap two photos to see them side by side.</div>
+        <div className="banner" style={{ marginBottom: 18 }}><Icon name="images" size={18} style={{ flexShrink: 0 }} /><span>Tap two photos to see them side by side.</span></div>
       )}
 
       {sorted.length === 0 ? (
-        <Empty emoji="🤳" title={`No ${area.toLowerCase()} photos yet`}
+        <Empty icon="camera" title={`No ${area.toLowerCase()} photos yet`}
           action={<button className="btn" onClick={() => setAdding(true)}>+ Add first photo</button>}>
           Take a photo in the same light and angle every couple of weeks — future you will thank you.
         </Empty>
@@ -106,7 +107,7 @@ export default function Progress() {
         </div>
       )}
 
-      <button className="fab" onClick={() => setAdding(true)} aria-label="Add photo">+</button>
+      <button className="fab" onClick={() => setAdding(true)} aria-label="Add photo"><Icon name="plus" size={26} /></button>
 
       {adding && <UploadForm area={area} onClose={() => setAdding(false)} />}
       {viewing && (
